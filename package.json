@@ -1,0 +1,74 @@
+{
+  "name": "nscale-kernel",
+  "description": "nearForm's nscale deployer kernel",
+  "keywords": [
+    "nearForm",
+    "deployer",
+    "nscale"
+  ],
+  "version": "0.14.7",
+  "license": "Artistic License 2.0",
+  "author": "Peter Elger (http://nearform.com/)",
+  "contributors": [
+    "Peter Elger <elger.peter@gmail.com> (http://peterelger.com/)",
+    "Matteo Collina <matteo.collina@nearform.com>"
+  ],
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "aws-ami-container": "~0.14.1",
+    "aws-elb-container": "~0.10.0",
+    "aws-sg-container": "~0.14.0",
+    "blank-container": "~0.3.0",
+    "bunyan": "^1.0.0",
+    "callback-stream": "^1.0.2",
+    "docker-container": "~0.14.2",
+    "docker-loghose": "^0.1.1",
+    "dockerode": "^2.0.6",
+    "forever-monitor": "^1.3.0",
+    "fs-extra": "~0.8.1",
+    "generify": "^1.1.0",
+    "gift": "^0.4.2",
+    "lodash": "^2.4.1",
+    "mkdirp": "^0.5.0",
+    "nodegit": "0.2.3",
+    "nscale-aws-analyzer": "~0.14.1",
+    "nscale-chaos-monkey": "^0.1.0",
+    "nscale-compiler": "~0.14.0",
+    "nscale-direct-analyzer": "~0.14.0",
+    "nscale-local-analyzer": "~0.14.0",
+    "nscale-noauth": "~0.2.0",
+    "nscale-planner": "~0.1.1",
+    "nscale-protocol": "~0.14.4",
+    "nscale-util": "~0.11.0",
+    "process-container": "~0.2.0",
+    "semver": "^2.3.0",
+    "split2": "^0.2.1",
+    "uuid": "~1.4.1",
+    "wrench": "~1.5.8",
+    "yargs": "^1.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nearform/nscale-kernel.git"
+  },
+  "devDependencies": {
+    "istanbul": "^0.3.2",
+    "jshint": "^2.5.6",
+    "mocha": "^2.1.0",
+    "pre-commit": "0.0.9",
+    "through": "^2.3.4"
+  },
+  "bin": {
+    "nscale-kernel": "bin/nscale-kernel.js",
+    "nsd-kernel": "bin/nscale-kernel.js"
+  },
+  "scripts": {
+    "lint": "jshint lib/**/*.js test/**/*.js",
+    "test-no-coverage": "mocha test/unit/*Test.js",
+    "test-coverage": "istanbul cover node_modules/.bin/_mocha -- -- test/unit/*Test.js",
+    "test": "npm run lint && npm run test-no-coverage"
+  }
+}
