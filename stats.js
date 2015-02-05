@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 'use strict';
 
 var nes = require('never-ending-stream');
@@ -52,7 +54,7 @@ function stats(opts) {
       through.obj(function(stats, enc, cb) {
         this.push({
           v: 0,
-          id: data.id,
+          id: data.id.slice(0, 12),
           image: data.image,
           stats: stats
         })
