@@ -48,20 +48,40 @@ function stats(opts) {
 
     streams[data.Id] = stream;
 
+    var previousSystem = 0;
+    var previousCpu = 0;
+
     pump(
       stream,
       split(JSON.parse),
       through.obj(function(stats, enc, cb) {
+        var percent = calculateCPUPercent(stats, previousCpu, previousSystem)
+        stats.cpu_stats.cpu_usage.cpu_percent = percent
         this.push({
           v: 0,
           id: data.id.slice(0, 12),
           image: data.image,
           stats: stats
         })
+        previousCpu = stats.cpu_stats.cpu_usage.total_usage
+        previousSystem = stats.cpu_stats.system_cpu_usage
         cb()
       })
     ).pipe(result, { end: false });
   }
+
+  // Code taken from https://github.com/icecrime/docker-mon/blob/ee9ac3fbaffcdec60d26eedd16204ca0370041d8/widgets/cpu.js
+  function calculateCPUPercent(statItem, previousCpu, previousSystem) {
+    var cpuDelta = statItem.cpu_stats.cpu_usage.total_usage - previousCpu
+    var systemDelta = statItem.cpu_stats.system_cpu_usage - previousSystem
+
+    var cpuPercent = 0.0
+    if (systemDelta > 0.0 && cpuDelta > 0.0) {
+      cpuPercent = (cpuDelta / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
+    }
+    return cpuPercent
+  }
+
 }
 
 module.exports = stats
