@@ -20,7 +20,7 @@
     "node": "*"
   },
   "dependencies": {
-    "docker-allcontainers": "git+http://github.com/mcollina/docker-allcontainers.git#stats",
+    "docker-allcontainers": "^0.1.2",
     "never-ending-stream": "^1.1.1",
     "pump": "^1.0.0",
     "split2": "^0.2.1",
