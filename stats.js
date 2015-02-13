@@ -40,11 +40,10 @@ function stats(opts) {
     // we should not do that, or we might be stuck in
     // an output loop
     if (data.id.indexOf(process.env.HOSTNAME) === 0) {
-      return
+      return;
     }
-    var stream = nes(function(cb) {
-      container.stats(null, cb)
-    });
+
+    var stream = nes(container.stats.bind(container));
 
     streams[data.Id] = stream;
 
