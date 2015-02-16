@@ -60,6 +60,7 @@ function stats(opts) {
           v: 0,
           id: data.id.slice(0, 12),
           image: data.image,
+          name: data.name,
           stats: stats
         })
         previousCpu = stats.cpu_stats.cpu_usage.total_usage

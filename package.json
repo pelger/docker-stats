@@ -20,7 +20,7 @@
     "node": "*"
   },
   "dependencies": {
-    "docker-allcontainers": "^0.1.2",
+    "docker-allcontainers": "^0.2.0",
     "never-ending-stream": "^1.1.1",
     "pump": "^1.0.0",
     "split2": "^0.2.1",
