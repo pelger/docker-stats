@@ -15,6 +15,8 @@ function stats(opts) {
   var streams = {};
   var oldDestroy = result.destroy;
 
+  result.setMaxListeners(0);
+
   result.destroy = function() {
     Object.keys(streams).forEach(detachContainer);
     events.destroy();
