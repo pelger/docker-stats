@@ -89,7 +89,13 @@ function stats(opts) {
 module.exports = stats
 
 function cli() {
-  stats().pipe(through.obj(function(chunk, enc, cb) {
+  var argv = require('minimist')(process.argv.slice(2))
+  stats({
+    matchByName: argv.matchByName,
+    matchByImage: argv.matchByImage,
+    skipByName: argv.skipByName,
+    skipByImage: argv.skipByImage
+  }).pipe(through.obj(function(chunk, enc, cb) {
     this.push(JSON.stringify(chunk))
     this.push('\n')
     cb()

@@ -14,7 +14,14 @@ npm install docker-stats --save
 var stats = require('docker-stats')
 var opts = {
   docker: null, // here goes options for Dockerode
-  events: null // an instance of docker-allcontainers
+  events: null, // an instance of docker-allcontainers
+
+  // the following options limit the containers being matched
+  // so we can avoid catching logs for unwanted containers
+  matchByName: /hello/, // optional
+  matchByImage: /matteocollina/, //optional
+  skipByName: /.*pasteur.*/, //optional
+  skipByImage: /.*dockerfile.*/ //optional
 }
 stats(opts).pipe(through.obj(function(chunk, enc, cb) {
   this.push(JSON.stringify(chunk))
