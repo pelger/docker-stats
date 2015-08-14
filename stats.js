@@ -14,6 +14,7 @@ function stats(opts) {
   var events = opts.events || allContainers(opts);
   var streams = {};
   var oldDestroy = result.destroy;
+  var interval = opts.statsinterval || 1;
 
   result.setMaxListeners(0);
 
@@ -52,21 +53,42 @@ function stats(opts) {
     var previousSystem = 0;
     var previousCpu = 0;
 
+    var sampleCount = 0;
+    var cpuSum = 0;
+    var sysSum = 0;
+
     pump(
       stream,
       split(JSON.parse),
       through.obj(function(stats, enc, cb) {
-        var percent = calculateCPUPercent(stats, previousCpu, previousSystem)
-        stats.cpu_stats.cpu_usage.cpu_percent = percent
-        this.push({
-          v: 0,
-          id: data.id.slice(0, 12),
-          image: data.image,
-          name: data.name,
-          stats: stats
-        })
-        previousCpu = stats.cpu_stats.cpu_usage.total_usage
-        previousSystem = stats.cpu_stats.system_cpu_usage
+        sampleCount++
+
+        cpuSum += stats.cpu_stats.cpu_usage.total_usage
+        sysSum += stats.cpu_stats.system_cpu_usage
+
+        if (sampleCount >= interval) {
+          stats.cpu_stats.cpu_usage.total_usage = cpuSum/sampleCount;
+          stats.cpu_stats.system_cpu_usage = sysSum/sampleCount;
+
+          var percent = calculateCPUPercent(stats, previousCpu, previousSystem)
+          stats.cpu_stats.cpu_usage.cpu_percent = percent
+
+          this.push({
+            v: 0,
+            id: data.id.slice(0, 12),
+            image: data.image,
+            name: data.name,
+            stats: stats
+          })
+
+          previousCpu = cpuSum
+          previousSystem = sysSum
+
+          sampleCount = 0
+          cpuSum = 0
+          sysSum = 0
+        }
+
         cb()
       })
     ).pipe(result, { end: false });
@@ -91,6 +113,7 @@ module.exports = stats
 function cli() {
   var argv = require('minimist')(process.argv.slice(2))
   stats({
+    statsinterval: argv.statsinterval,
     matchByName: argv.matchByName,
     matchByImage: argv.matchByImage,
     skipByName: argv.skipByName,
