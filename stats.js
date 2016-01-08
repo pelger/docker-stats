@@ -101,7 +101,7 @@ function stats(opts) {
 
     var cpuPercent = 0.0
     if (systemDelta > 0.0 && cpuDelta > 0.0) {
-      cpuPercent = (cpuDelta / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
+      cpuPercent = (cpuDelta * 1.0 / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
     }
     return cpuPercent
   }
