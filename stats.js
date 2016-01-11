@@ -81,8 +81,8 @@ function stats(opts) {
             stats: stats
           })
 
-          previousCpu = cpuSum
-          previousSystem = sysSum
+          previousCpu = stats.cpu_stats.cpu_usage.total_usage
+          previousSystem = stats.cpu_stats.system_cpu_usage
 
           sampleCount = 0
           cpuSum = 0
@@ -98,10 +98,9 @@ function stats(opts) {
   function calculateCPUPercent(statItem, previousCpu, previousSystem) {
     var cpuDelta = statItem.cpu_stats.cpu_usage.total_usage - previousCpu
     var systemDelta = statItem.cpu_stats.system_cpu_usage - previousSystem
-
     var cpuPercent = 0.0
     if (systemDelta > 0.0 && cpuDelta > 0.0) {
-      cpuPercent = (cpuDelta / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
+      cpuPercent = (cpuDelta * 1.0 / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
     }
     return cpuPercent
   }
