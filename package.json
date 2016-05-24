@@ -3,6 +3,9 @@
   "description": "All your docker containers statistics as a stream",
   "main": "stats.js",
   "bind": "stats.js",
+  "scripts": {
+    "start": "./stats.js"
+  },
   "keywords": [
     "docker",
     "container",
