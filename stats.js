@@ -6,6 +6,7 @@ var nes = require('never-ending-stream');
 var through = require('through2');
 var split = require('split2');
 var pump = require('pump');
+var net = require('net');
 var allContainers = require('docker-allcontainers');
 
 function stats(opts) {
@@ -111,6 +112,26 @@ module.exports = stats
 
 function cli() {
   var argv = require('minimist')(process.argv.slice(2))
+  if (argv.host) {
+    var host_and_port = argv.host.split(':');
+    var host = {
+        host: host_and_port[0]
+    };
+    if (host_and_port.length > 1) {
+        host.port = Number(host_and_port[1]);
+    }
+    console.log('Connecting to:', host);
+    var stream = net.connect(host, function() {
+        console.log('Starting stat stream');
+        on_ready(stream);
+    });
+  } else {
+    on_ready(process.stdout);
+  }
+}
+
+function on_ready(stream) {
+  var argv = require('minimist')(process.argv.slice(2))
   stats({
     statsinterval: argv.statsinterval,
     matchByName: argv.matchByName,
@@ -121,7 +142,7 @@ function cli() {
     this.push(JSON.stringify(chunk))
     this.push('\n')
     cb()
-  })).pipe(process.stdout)
+  })).pipe(stream)
 }
 
 if (require.main === module) {
