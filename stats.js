@@ -1,79 +1,79 @@
 #! /usr/bin/env node
 
-'use strict';
+'use strict'
 
-var nes = require('never-ending-stream');
-var through = require('through2');
-var split = require('split2');
-var pump = require('pump');
-var net = require('net');
-var allContainers = require('docker-allcontainers');
+var nes = require('never-ending-stream')
+var through = require('through2')
+var split = require('split2')
+var pump = require('pump')
+var net = require('net')
+var allContainers = require('docker-allcontainers')
 
-function stats(opts) {
-  opts = opts || {};
-  var result = through.obj();
-  var events = opts.events || allContainers(opts);
-  var streams = {};
-  var oldDestroy = result.destroy;
-  var interval = opts.statsinterval || 1;
+function stats (opts) {
+  opts = opts || {}
+  var result = through.obj()
+  var events = opts.events || allContainers(opts)
+  var streams = {}
+  var oldDestroy = result.destroy
+  var interval = opts.statsinterval || 1
 
-  result.setMaxListeners(0);
+  result.setMaxListeners(0)
 
-  result.destroy = function() {
-    Object.keys(streams).forEach(detachContainer);
-    events.destroy();
-    oldDestroy.call(this);
-  };
+  result.destroy = function () {
+    Object.keys(streams).forEach(detachContainer)
+    events.destroy()
+    oldDestroy.call(this)
+  }
 
-  events.on('start', attachContainer);
-  events.on('stop', function(meta) {
-    detachContainer(meta.id);
-  });
+  events.on('start', attachContainer)
+  events.on('stop', function (meta) {
+    detachContainer(meta.id)
+  })
 
-  return result;
+  return result
 
-  function detachContainer(id) {
+  function detachContainer (id) {
     if (streams[id]) {
-      streams[id].destroy();
-      delete streams[id];
+      streams[id].destroy()
+      delete streams[id]
     }
   }
 
-  function attachContainer(data, container) {
+  function attachContainer (data, container) {
     // we are trying to tap into this container
     // we should not do that, or we might be stuck in
     // an output loop
     if (data.id.indexOf(process.env.HOSTNAME) === 0) {
-      return;
+      return
     }
 
     var stream = nes(function (cb) {
       container.stats(function (err, stream) {
-        cb(err, stream);
-      });
-    });
+        cb(err, stream)
+      })
+    })
 
-    streams[data.Id] = stream;
+    streams[data.Id] = stream
 
-    var previousSystem = 0;
-    var previousCpu = 0;
+    var previousSystem = 0
+    var previousCpu = 0
 
-    var sampleCount = 0;
-    var cpuSum = 0;
-    var sysSum = 0;
+    var sampleCount = 0
+    var cpuSum = 0
+    var sysSum = 0
 
     pump(
       stream,
       split(JSON.parse),
-      through.obj(function(stats, enc, cb) {
+      through.obj(function (stats, enc, cb) {
         sampleCount++
 
         cpuSum += stats.cpu_stats.cpu_usage.total_usage
         sysSum += stats.cpu_stats.system_cpu_usage
 
         if (sampleCount >= interval) {
-          stats.cpu_stats.cpu_usage.total_usage = cpuSum/sampleCount;
-          stats.cpu_stats.system_cpu_usage = sysSum/sampleCount;
+          stats.cpu_stats.cpu_usage.total_usage = cpuSum / sampleCount
+          stats.cpu_stats.system_cpu_usage = sysSum / sampleCount
 
           var percent = calculateCPUPercent(stats, previousCpu, previousSystem)
           stats.cpu_stats.cpu_usage.cpu_percent = percent
@@ -96,11 +96,11 @@ function stats(opts) {
 
         cb()
       })
-    ).pipe(result, { end: false });
+    ).pipe(result, { end: false })
   }
 
   // Code taken from https://github.com/icecrime/docker-mon/blob/ee9ac3fbaffcdec60d26eedd16204ca0370041d8/widgets/cpu.js
-  function calculateCPUPercent(statItem, previousCpu, previousSystem) {
+  function calculateCPUPercent (statItem, previousCpu, previousSystem) {
     var cpuDelta = statItem.cpu_stats.cpu_usage.total_usage - previousCpu
     var systemDelta = statItem.cpu_stats.system_cpu_usage - previousSystem
     var cpuPercent = 0.0
@@ -109,32 +109,31 @@ function stats(opts) {
     }
     return cpuPercent
   }
-
 }
 
 module.exports = stats
 
-function cli() {
+function cli () {
   var argv = require('minimist')(process.argv.slice(2))
   if (argv.host) {
-    var host_and_port = argv.host.split(':');
+    var hostAndPort = argv.host.split(':')
     var host = {
-      host: host_and_port[0]
-    };
-    if (host_and_port.length > 1) {
-      host.port = Number(host_and_port[1]);
+      host: hostAndPort[0]
     }
-    console.log('Connecting to:', host);
-    var stream = net.connect(host, function() {
-      console.log('Starting stat stream');
-      start(stream);
-    });
+    if (hostAndPort.length > 1) {
+      host.port = Number(hostAndPort[1])
+    }
+    console.log('Connecting to:', host)
+    var stream = net.connect(host, function () {
+      console.log('Starting stat stream')
+      start(stream)
+    })
   } else {
-    start(process.stdout);
+    start(process.stdout)
   }
 }
 
-function start(stream) {
+function start (stream) {
   var argv = require('minimist')(process.argv.slice(2))
   pump(
     stats({
@@ -144,7 +143,7 @@ function start(stream) {
       skipByName: argv.skipByName,
       skipByImage: argv.skipByImage
     }),
-    through.obj(function(chunk, enc, cb) {
+    through.obj(function (chunk, enc, cb) {
       this.push(JSON.stringify(chunk))
       this.push('\n')
       cb()

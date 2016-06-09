@@ -4,8 +4,10 @@
   "main": "stats.js",
   "bind": "stats.js",
   "scripts": {
-    "start": "./stats.js"
+    "start": "./stats.js",
+    "test": "standard"
   },
+  "pre-commit": "test",
   "keywords": [
     "docker",
     "container",
@@ -33,5 +35,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pelger/docker-stats.git"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.1.3",
+    "standard": "^7.1.2"
   }
 }
