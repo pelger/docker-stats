@@ -47,7 +47,11 @@ function stats(opts) {
       return;
     }
 
-    var stream = nes(container.stats.bind(container));
+    var stream = nes(function (cb) {
+      container.stats(function (err, stream) {
+        cb(err, stream);
+      });
+    });
 
     streams[data.Id] = stream;
 
@@ -115,34 +119,38 @@ function cli() {
   if (argv.host) {
     var host_and_port = argv.host.split(':');
     var host = {
-        host: host_and_port[0]
+      host: host_and_port[0]
     };
     if (host_and_port.length > 1) {
-        host.port = Number(host_and_port[1]);
+      host.port = Number(host_and_port[1]);
     }
     console.log('Connecting to:', host);
     var stream = net.connect(host, function() {
-        console.log('Starting stat stream');
-        on_ready(stream);
+      console.log('Starting stat stream');
+      start(stream);
     });
   } else {
-    on_ready(process.stdout);
+    start(process.stdout);
   }
 }
 
-function on_ready(stream) {
+function start(stream) {
   var argv = require('minimist')(process.argv.slice(2))
-  stats({
-    statsinterval: argv.statsinterval,
-    matchByName: argv.matchByName,
-    matchByImage: argv.matchByImage,
-    skipByName: argv.skipByName,
-    skipByImage: argv.skipByImage
-  }).pipe(through.obj(function(chunk, enc, cb) {
-    this.push(JSON.stringify(chunk))
-    this.push('\n')
-    cb()
-  })).pipe(stream)
+  pump(
+    stats({
+      statsinterval: argv.statsinterval,
+      matchByName: argv.matchByName,
+      matchByImage: argv.matchByImage,
+      skipByName: argv.skipByName,
+      skipByImage: argv.skipByImage
+    }),
+    through.obj(function(chunk, enc, cb) {
+      this.push(JSON.stringify(chunk))
+      this.push('\n')
+      cb()
+    }),
+    stream
+  )
 }
 
 if (require.main === module) {
