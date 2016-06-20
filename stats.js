@@ -40,13 +40,6 @@ function stats (opts) {
   }
 
   function attachContainer (data, container) {
-    // we are trying to tap into this container
-    // we should not do that, or we might be stuck in
-    // an output loop
-    if (data.id.indexOf(process.env.HOSTNAME) === 0) {
-      return
-    }
-
     var stream = nes(function (cb) {
       container.stats(function (err, stream) {
         cb(err, stream)
