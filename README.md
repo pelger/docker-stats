@@ -12,6 +12,7 @@ npm install docker-stats --save
 
 ```
 var stats = require('docker-stats')
+var through = require('through2')
 var opts = {
   docker: null, // here goes options for Dockerode
   events: null, // an instance of docker-allcontainers
