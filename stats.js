@@ -46,7 +46,7 @@ function stats (opts) {
       })
     })
 
-    streams[data.Id] = stream
+    streams[data.id] = stream
 
     var previousSystem = 0
     var previousCpu = 0
