@@ -98,7 +98,13 @@ function stats (opts) {
     var systemDelta = statItem.cpu_stats.system_cpu_usage - previousSystem
     var cpuPercent = 0.0
     if (systemDelta > 0.0 && cpuDelta > 0.0) {
-      cpuPercent = (cpuDelta * 1.0 / systemDelta) * statItem.cpu_stats.cpu_usage.percpu_usage.length * 100.0
+      var numCPUs = statItem.cpu_stats.cpu_usage.percpu_usage.length
+      // Attention: see https://github.com/moby/moby/issues/28941
+      // As a fix, the Docker API reports cpu_stats.online_cpus
+      if (statItem.cpu_stats.online_cpus) {
+        numCPUs = statItem.cpu_stats.online_cpus
+      }
+      cpuPercent = (cpuDelta * 1.0 / systemDelta) * numCPUs * 100.0
     }
     return cpuPercent
   }
